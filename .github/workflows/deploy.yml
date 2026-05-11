@@ -31,7 +31,7 @@ jobs:
 
     - name: Tag Docker Image
       run: |
-        docker tag eks-dev-image:latest 300724398447.dkr.ecr.us-east-1.amazonaws.com/eks-dev
+        docker tag eks-dev 300724398447.dkr.ecr.us-east-1.amazonaws.com/eks-dev
 
     - name: Push Docker Image
       run: |
