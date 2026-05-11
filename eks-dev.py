@@ -1,1 +1,1 @@
-print("Hi Suriya, welcome to the EKS dev environmentt")
+print("Hi Suriya, welcome to the EKS dev environment..")
