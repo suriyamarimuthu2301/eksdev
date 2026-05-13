@@ -27,6 +27,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Check AWS IAM User
+        run: |
+          aws sts get-caller-identity
+
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
@@ -46,7 +50,11 @@ jobs:
         run: |
           aws eks update-kubeconfig \
             --region $AWS_REGION \
-            --name EKS-Dev-Cluster
+            --name $EKS_CLUSTER_NAME
+
+      - name: Check Kubernetes Access
+        run: |
+          kubectl get nodes
 
       - name: Deploy using Helm
         run: |
