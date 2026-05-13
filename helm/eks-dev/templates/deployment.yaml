@@ -1,1 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
 
+metadata:
+  name: eks-dev
+
+spec:
+  replicas: {{ .Values.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: eks-dev
+
+  template:
+    metadata:
+      labels:
+        app: eks-dev
+
+    spec:
+      containers:
+        - name: eks-dev
+
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            - containerPort: {{ .Values.containerPort }}
