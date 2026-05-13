@@ -1,0 +1,13 @@
+replicaCount: 5
+
+image:
+  repository: 300724398447.dkr.ecr.us-east-1.amazonaws.com/eks-dev
+  tag: latest
+  pullPolicy: Always
+
+containerPort: 5000
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 5000
