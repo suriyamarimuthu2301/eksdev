@@ -1,0 +1,56 @@
+name: Build Push and Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: eks-dev
+  EKS_CLUSTER_NAME: EKS-Dev-Cluster
+  HELM_RELEASE_NAME: eks-dev
+  HELM_CHART_PATH: ./helm/eks-dev
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker Image
+        run: |
+          docker build -t $ECR_REPOSITORY:${{ github.sha }} .
+
+      - name: Tag Docker Image
+        run: |
+          docker tag $ECR_REPOSITORY:${{ github.sha }} 300724398447.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:${{ github.sha }}
+
+      - name: Push Docker Image
+        run: |
+          docker push 300724398447.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:${{ github.sha }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region $AWS_REGION \
+            --name $EKS_CLUSTER_NAME
+
+      - name: Deploy using Helm
+        run: |
+          helm upgrade --install $HELM_RELEASE_NAME $HELM_CHART_PATH \
+            --set image.repository=300724398447.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY \
+            --set image.tag=${{ github.sha }} \
+            --namespace default
